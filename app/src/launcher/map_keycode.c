@@ -1,4 +1,7 @@
 
+#include <string.h>
+#include <zephyr/devicetree.h>
+#include <zephyr/sys/util.h>
 #include "launcher.h"
 #include "keycodes.h"
 #include <zmk/behavior.h>
@@ -232,6 +235,40 @@ void via_keycode_to_binding(uint8_t keycode,struct zmk_behavior_binding * bindin
         }
 }
 
+/*
+ * Home row mods: when the keymap defines hm_l and hm_r, a Mod-Tap key on a left-hand key
+ * uses hm_l and one on a right-hand key uses hm_r. The hands come from the two behaviors'
+ * hold-trigger-key-positions: hm_r triggers on the left-hand keys, hm_l on the right-hand
+ * keys, and both on the bottom row. Keys in both lists or in neither keep the stock &mt.
+ */
+#if DT_NODE_EXISTS(DT_NODELABEL(hm_l)) && DT_NODE_EXISTS(DT_NODELABEL(hm_r))
+static const int32_t hm_l_triggers[] = DT_PROP(DT_NODELABEL(hm_l), hold_trigger_key_positions);
+static const int32_t hm_r_triggers[] = DT_PROP(DT_NODELABEL(hm_r), hold_trigger_key_positions);
+
+static bool position_in(const int32_t *list, size_t len, int32_t position) {
+    for (size_t i = 0; i < len; i++) {
+        if (list[i] == position) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static char *mod_tap_behavior(int32_t position) {
+    bool left = position_in(hm_r_triggers, ARRAY_SIZE(hm_r_triggers), position);
+    bool right = position_in(hm_l_triggers, ARRAY_SIZE(hm_l_triggers), position);
+    if (left && !right) {
+        return DT_PROP(DT_NODELABEL(hm_l), label);
+    }
+    if (right && !left) {
+        return DT_PROP(DT_NODELABEL(hm_r), label);
+    }
+    return "MOD_TAP";
+}
+#else
+static char *mod_tap_behavior(int32_t position) { return "MOD_TAP"; }
+#endif
+
 void set_zmk_keymap(uint8_t layer,uint8_t row ,uint8_t column ,uint16_t keycode) {
 
     int32_t position = zmk_matrix_transform_row_column_to_position(row, column);
@@ -327,7 +364,7 @@ void set_zmk_keymap(uint8_t layer,uint8_t row ,uint8_t column ,uint16_t keycode)
         //     break;
 
         case QK_MOD_TAP ... QK_MOD_TAP_MAX:
-            binding.behavior_dev="MOD_TAP";//"&mt";
+            binding.behavior_dev=mod_tap_behavior(position);//"&mt", or a home row mod
             binding.param1 =mod_to_zmk_keycode(QK_MODS_GET_MODS(keycode));//fix mod
             binding.param2 =QK_MODS_GET_BASIC_KEYCODE(keycode);  
             break;
@@ -522,7 +559,7 @@ void generate_via_keymaps(void)
                                 break;
                         }
 
-                    } else if(memcmp(behavior_dev,"MO",2)==0) {     //&mo               
+                    } else if(strcmp(behavior_dev,"MO")==0) {     //&mo (exact: "MOD_TAP*" also starts with "MO")
                         uint16_t keycode= binding->param1 &0xffff;
                         gen_via_keymaps[layer][row][column]=QK_MOMENTARY | (keycode &0x1f);
 
