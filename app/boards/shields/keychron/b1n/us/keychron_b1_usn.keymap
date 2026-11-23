@@ -67,6 +67,23 @@
         bindings = <&kp>, <&kp>;
     };
 
+    /*
+     * Mod-Tap keys whose modifier is only Alt/AltGr/Option (the accent key on Mac and on the
+     * us(mac) / AltGr layouts) use this instead of hm_l/hm_r: accents are typed mid-word and
+     * often with keys of the same hand (AltGr+E = acute, AltGr+C = c-cedilla), so there is
+     * no prior-idle window and every key can trigger the hold. "balanced" keeps normal rolls
+     * (S released before the next key) as letters.
+     */
+    hm_alt: home_row_mod_alt {
+        compatible = "zmk,behavior-hold-tap";
+        label = "MOD_TAP_ALT";
+        #binding-cells = <2>;
+        flavor = "balanced";
+        tapping-term-ms = <220>;
+        quick-tap-ms = <175>;
+        bindings = <&kp>, <&kp>;
+    };
+
     long_press_recover:l1 {
         compatible = "zmk,behavior-hold-tap";
         label = "l1";

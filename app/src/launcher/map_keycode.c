@@ -254,7 +254,14 @@ static bool position_in(const int32_t *list, size_t len, int32_t position) {
     return false;
 }
 
-static char *mod_tap_behavior(int32_t position) {
+static char *mod_tap_behavior(int32_t position, uint8_t qmk_mods) {
+#if DT_NODE_EXISTS(DT_NODELABEL(hm_alt))
+    // Alt / AltGr / Option alone is the accent key: it has to work mid-word and with keys of
+    // its own hand (AltGr+E, AltGr+C), so it gets hm_alt instead of the hand rules.
+    if ((qmk_mods & 0x0f) == 0x04) {
+        return DT_PROP(DT_NODELABEL(hm_alt), label);
+    }
+#endif
     bool left = position_in(hm_r_triggers, ARRAY_SIZE(hm_r_triggers), position);
     bool right = position_in(hm_l_triggers, ARRAY_SIZE(hm_l_triggers), position);
     if (left && !right) {
@@ -266,7 +273,7 @@ static char *mod_tap_behavior(int32_t position) {
     return "MOD_TAP";
 }
 #else
-static char *mod_tap_behavior(int32_t position) { return "MOD_TAP"; }
+static char *mod_tap_behavior(int32_t position, uint8_t qmk_mods) { return "MOD_TAP"; }
 #endif
 
 void set_zmk_keymap(uint8_t layer,uint8_t row ,uint8_t column ,uint16_t keycode) {
@@ -364,7 +371,7 @@ void set_zmk_keymap(uint8_t layer,uint8_t row ,uint8_t column ,uint16_t keycode)
         //     break;
 
         case QK_MOD_TAP ... QK_MOD_TAP_MAX:
-            binding.behavior_dev=mod_tap_behavior(position);//"&mt", or a home row mod
+            binding.behavior_dev=mod_tap_behavior(position, QK_MODS_GET_MODS(keycode));//"&mt", or a home row mod
             binding.param1 =mod_to_zmk_keycode(QK_MODS_GET_MODS(keycode));//fix mod
             binding.param2 =QK_MODS_GET_BASIC_KEYCODE(keycode);  
             break;
