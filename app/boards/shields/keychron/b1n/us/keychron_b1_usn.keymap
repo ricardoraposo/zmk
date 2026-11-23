@@ -58,13 +58,13 @@
         combo_jz {
             timeout-ms = <500>;
             layers = <1 3>;
-            key-positions = <49 56>; //fn+j+z
+            key-positions = <0 56>; //fn+esc+z (moved off J so J is never held back on the Fn layers)
             bindings = <&long_press_recover 0 0>;
         };
         combo_xl {
             timeout-ms = <500>;
             layers =< 1 3>;
-            key-positions = <57 51>; //fn+x+l
+            key-positions = <0 57>; //fn+esc+x (moved off L so L is never held back on the Fn layers)
             bindings = <&long_press_change 0 0>;
         };
 /*        
