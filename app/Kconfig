@@ -613,6 +613,9 @@ source "subsys/logging/Kconfig.template.log_config"
 rsource "boards/Kconfig"
 rsource "boards/shields/*/Kconfig.defconfig"
 rsource "boards/shields/*/Kconfig.shield"
+# Keychron keeps its shields two levels deeper (keychron/<model>/<layout>); without this line their
+# Kconfig.shield files are never loaded and the per-model options stay off.
+rsource "boards/shields/keychron/*/*/Kconfig.shield"
 
 osource "$(ZMK_CONFIG)/boards/shields/*/Kconfig.defconfig"
 osource "$(ZMK_CONFIG)/boards/shields/*/Kconfig.shield"
