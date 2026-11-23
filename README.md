@@ -29,7 +29,13 @@ patch zephyr:
 ```
     cd zephyr
     git am ../001-esb-nrf-fix.patch
+    git am ../0002-revert-bas-cpf.patch
 ```
+The second patch removes the Characteristic Presentation Format descriptor that the
+zmk Zephyr branch added to the Battery Service on 2023-11-29. Keychron's factory
+firmware was built before that commit; with the descriptor, every GATT handle after
+the Battery Service shifts by one, so hosts bonded under the factory firmware read
+the wrong attributes on their first reconnect.
 build firmware:
 ```
     cd app

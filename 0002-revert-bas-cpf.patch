@@ -1,0 +1,43 @@
+From 56f4f3d068fd702124ca74220ba69a61e6f5078d Mon Sep 17 00:00:00 2001
+From: build <build@localhost>
+Date: Mon, 23 Nov 2026 19:36:41 -0300
+Subject: [PATCH] Revert "bluetooth: Add CPF attribute to BAS battery level."
+
+This reverts commit 1ae0eb5ce8adafcec993e6fb8f4eeb6f818a7772.
+---
+ subsys/bluetooth/services/bas.c | 12 ------------
+ 1 file changed, 12 deletions(-)
+
+diff --git a/subsys/bluetooth/services/bas.c b/subsys/bluetooth/services/bas.c
+index ead09c15a7..da739069db 100644
+--- a/subsys/bluetooth/services/bas.c
++++ b/subsys/bluetooth/services/bas.c
+@@ -47,17 +47,6 @@ static ssize_t read_blvl(struct bt_conn *conn,
+ 				 sizeof(lvl8));
+ }
+ 
+-/* Constant values from the Assigned Numbers specification:
+- * https://www.bluetooth.com/wp-content/uploads/Files/Specification/Assigned_Numbers.pdf?id=89
+- */
+-static const struct bt_gatt_cpf level_cpf = {
+-	.format = 0x04,        /* uint8 */
+-	.exponent = 0x0,
+-	.unit = 0x27AD,        /* Percentage */
+-	.name_space = 0x01,    /* Bluetooth SIG */
+-	.description = 0x0106, /* "main" */
+-};
+-
+ BT_GATT_SERVICE_DEFINE(bas,
+ 	BT_GATT_PRIMARY_SERVICE(BT_UUID_BAS),
+ 	BT_GATT_CHARACTERISTIC(BT_UUID_BAS_BATTERY_LEVEL,
+@@ -66,7 +55,6 @@ BT_GATT_SERVICE_DEFINE(bas,
+ 			       &battery_level),
+ 	BT_GATT_CCC(blvl_ccc_cfg_changed,
+ 		    BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
+-	BT_GATT_CPF(&level_cpf),
+ );
+ 
+ static int bas_init(const struct device *dev)
+-- 
+2.52.0
+
