@@ -356,7 +356,8 @@ void set_zmk_keymap(uint8_t layer,uint8_t row ,uint8_t column ,uint16_t keycode)
         case QK_ONE_SHOT_MOD ... QK_ONE_SHOT_MOD_MAX:;
             // OSM(mod) - One-shot mod
             binding.behavior_dev="STICKY_KEY";//"&sk";
-            binding.param1= keycode &0x1f;
+            // &sk takes a key (LSHIFT), not QMK mod bits: OSM(MOD_LSFT) used to send usage 0x02.
+            binding.param1= (HID_USAGE_KEY<<16) | mod_to_zmk_keycode(keycode &0x1f);
             break;
 
         // case QK_LAYER_TAP_TOGGLE ... QK_LAYER_TAP_TOGGLE_MAX:
@@ -638,7 +639,8 @@ void generate_via_keymaps(void)
 
                     } else if(memcmp(behavior_dev,"STICKY_KEY",9)==0) {//&sk
 
-                        uint8_t mod =binding->param1&0x1f;
+                        uint8_t kc =binding->param1&0xff;
+                        uint8_t mod =(kc >= 0xE0 && kc <= 0xE7) ? mod_kc_to_via(kc) : (binding->param1&0x1f);
                         gen_via_keymaps[layer][row][column]=QK_ONE_SHOT_MOD | (mod);
 
                     } else if(memcmp(behavior_dev,"TRANS",5)==0) {//&trans

@@ -313,6 +313,22 @@
         &none   &none                   &none                       &none                               &none
             >;
         };
+        // Arrows, shared by Mac and Win: hold L (set LT(4,L) in the Launcher).
+        //   Q Home   W Up     E End    R PgUp
+        //   A Left   S Down   D Right  F PgDn
+        // Everything else falls through, so Shift/Cmd/Ctrl + arrows select and jump.
+        arrow_layer {
+        bindings = <
+        &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
+        &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
+        &trans  &kp HOME  &kp UP  &kp END  &kp PG_UP  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
+        &trans  &kp LEFT  &kp DOWN  &kp RIGHT  &kp PG_DN  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
+        &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
+        &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
+        &trans  &trans  &trans  &trans
+            >;
+        };
+
    
 
     	
@@ -320,4 +336,17 @@
 	};
 };
 
-	
+/*
+ * One-shot Shift (OSM in the Launcher): tap Shift, the next key is shifted. quick-release lets
+ * it go when the next key is pressed (fast rolls like "Th" give "Th", not "TH"); it waits
+ * up to 5 s for that key.
+ */
+&sk {
+    release-after-ms = <5000>;
+    quick-release;
+};
+
+/* Layer-tap keys (A = Fn, L = arrows): tap then hold within 175 ms repeats the letter. */
+&lt {
+    quick-tap-ms = <175>;
+};
